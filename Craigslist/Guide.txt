@@ -1,0 +1,32 @@
+Requirments:
+-> Python
+-> Selenium
+-> geckodriver
+
+How to install Python?
+https://phoenixnap.com/kb/how-to-install-python-3-windows (In Windows)
+https://www.youtube.com/watch?v=TgA4ObrowRg (In Mac OS)
+
+How to install Selenium?
+https://pypi.org/project/selenium/ (Python is neccessary)
+
+How to download geckodriver?
+https://github.com/mozilla/geckodriver/releases/tag/v0.26.0 (On below of page)
+
+Important!!!
+1) Open craigslist.py on any ide.
+2) Copy geckodriver path
+3) paste in all executable_path available in craigslist.py
+Like this, (executable_path='C:/Users/92324/Downloads/geckodriver-v0.26.0-win64/geckodriver.exe')
+
+
+How to run file?
+1) You can run through ide.
+2) You can through cmd.
+
+How to run through cmd?
+* open cmd in craigslist.py's folder
+* type python craigslist.py
+
+Your Scrapes csv will be available in same folder
+
