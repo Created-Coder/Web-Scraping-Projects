@@ -38,14 +38,7 @@ def mainCode():
 
     # DataBase Appending
     config = {
-        "apiKey": "AIzaSyDgm1nCubjtFnec2CyJezEJW4gGP4HjnPE",
-        "authDomain": "cryptotracker-2021.firebaseapp.com",
-        "databaseURL": "https://cryptotracker-2021-default-rtdb.firebaseio.com",
-        "projectId": "cryptotracker-2021",
-        "storageBucket": "cryptotracker-2021.appspot.com",
-        "messagingSenderId": "655100349264",
-        "appId": "1:655100349264:web:8f2a818db1195a5867ba55",
-        "measurementId": "G-WMCPZT75G6"
+        
     }
 
     firebase = Firebase(config)
