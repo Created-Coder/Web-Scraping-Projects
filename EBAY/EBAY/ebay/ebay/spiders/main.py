@@ -1,35 +1,43 @@
 import scrapy
 import urllib.request
-from scraper_api import ScraperAPIClient
+#from scraper_api import ScraperAPIClient
 import os
 import re
 from datetime import datetime
-client = ScraperAPIClient('eedf935a9a6fec5ad78458600c3442bb')
+
+#client = ScraperAPIClient('eedf935a9a6fec5ad78458600c3442bb')
+
 
 class EbaySpider(scrapy.Spider):
     name = "ebay"
-
-    start_urls = ["https://www.ebay-kleinanzeigen.de/s-musikinstrumente/seite:1/c74"]
+    start_urls = (
+        'https://www.google.com/',
+    )
 
     def parse(self, response):
+        url='https://www.ebay-kleinanzeigen.de/s-musikinstrumente/seite:1/c74'
+        proxy = 'olivier666:CzsucsMgi2cS8t8y@proxy.packetstream.io:31112'
+        yield scrapy.Request(url,meta={'proxy': 'http://{0}'.format(proxy)}, callback=self.parse_main)
+
+    def parse_main(self, response):
+        proxy = 'olivier666:CzsucsMgi2cS8t8y@proxy.packetstream.io:31112'
         listing = response.xpath("//a[@class='ellipsis']/@href")
         for i in listing:
             comp_url = "https://www.ebay-kleinanzeigen.de" + i.extract()
             # yield scrapy.Request(client.scrapyGet(url=comp_url), self.parse2)
-            yield scrapy.Request(comp_url, self.parse2)
+            yield scrapy.Request(comp_url,meta={'proxy': 'http://{0}'.format(proxy)}, callback=self.parse2)
 
-        for i in range(2,51):
-            url = f"https://www.ebay-kleinanzeigen.de/s-musikinstrumente/seite:{i}/c74"
+        for i in range(2, 51):
+            url = "https://www.ebay-kleinanzeigen.de/s-musikinstrumente/seite:{0}/c74".format(i)
             # yield scrapy.Request(client.scrapyGet(url=url), self.parse)
-            yield scrapy.Request(url, self.parse)
-            
-        # next_page = response.xpath("//a[@class='pagination-next']/@href").get()
-        # next_page = "https://www.ebay-kleinanzeigen.de" + next_page
-        # yield scrapy.Request(client.scrapyGet(url=next_page), self.parse)
+            yield scrapy.Request(url,meta={'proxy': 'http://{0}'.format(proxy)}, callback=self.parse_main)
 
+            # next_page = response.xpath("//a[@class='pagination-next']/@href").get()
+            # next_page = "https://www.ebay-kleinanzeigen.de" + next_page
+            # yield scrapy.Request(client.scrapyGet(url=next_page), self.parse)
 
     def parse2(self, response):
-
+        proxy = 'olivier666:CzsucsMgi2cS8t8y@proxy.packetstream.io:31112'
         scraping_date = datetime.today().strftime('%Y/%m/%d')
 
         try:
@@ -41,8 +49,6 @@ class EbaySpider(scrapy.Spider):
 
         except:
             prd_title = None
-
-
 
         try:
             price_data = response.xpath("//h2[@id='viewad-price']//text()").get()
@@ -56,9 +62,14 @@ class EbaySpider(scrapy.Spider):
         except:
             price_data = None
 
-        price_data = price_data.split()
-        price = price_data[0]
-        currency = price_data[1]
+        price=None
+        currency=None
+        try:
+            price_data = price_data.split()
+            price = price_data[0]
+            currency = price_data[1]
+        except:
+            yield scrapy.Request(response.url, meta={'proxy': 'http://{0}'.format(proxy)}, callback=self.parse2)
 
         try:
             address = response.xpath("(//div[@class='boxedarticle--details--full'])[1]//span//text()").extract()
@@ -66,7 +77,6 @@ class EbaySpider(scrapy.Spider):
 
         except:
             address = None
-
 
         try:
             date = response.xpath("(//div[@id='viewad-extra-info']//span)[1]//text()").get()
@@ -80,14 +90,12 @@ class EbaySpider(scrapy.Spider):
         except:
             date = None
 
-
         try:
             desc = response.xpath("//div[@id='viewad-description']/div/p//text()").getall()
             desc = '\n '.join([str(elem.replace("\n", "").strip()) for elem in desc])
 
         except:
             desc = None
-
 
         # try:
         #     detail = response.xpath("//span[@class='addetailslist--detail--value']//text()").get()
@@ -133,30 +141,29 @@ class EbaySpider(scrapy.Spider):
         except:
             adID = None
 
+        # try:
+        #     src = response.xpath("(//img[@id='viewad-image'])[1]/@src").get()
+        #     file_path = os.getcwd() + "/images/" + prd_title + ".jpg"
+        #     urllib.request.urlretrieve(src, file_path)
+        #
+        # except:
+        #     pass
+        if price:
+            yield {
+                "Scraping Date": scraping_date,
+                "title": prd_title,
+                "price": price,
+                "Currency": currency,
+                "address": address,
+                "date": date,
+                "description": desc,
+                'Delivery Option': delivery,
+                # "Seller" : seller,
+                "Date of Membership": dateMembership,
+                "Ad ID": adID,
+                "Image URL": '',
+                # "Image Local Path" : file_path
 
+            }
+            #print(data)
 
-        try:
-            src = response.xpath("(//img[@id='viewad-image'])[1]/@src").get()
-            file_path = os.getcwd() + "/images/" + prd_title + ".jpg"
-            urllib.request.urlretrieve(src, file_path)
-
-        except:
-            pass
-
-
-        yield {
-            "Scraping Date" : scraping_date,
-            "title" : prd_title,
-            "price" : price,
-            "Currency" : currency,
-            "address" : address,
-            "date" : date,
-            "description" : desc,
-            'Delivery Option' : delivery,
-            # "Seller" : seller,
-            "Date of Membership" : dateMembership,
-            "Ad ID" : adID,
-            "Image URL" : src,
-            # "Image Local Path" : file_path
-
-        }
